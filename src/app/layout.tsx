@@ -30,6 +30,7 @@ export default function RootLayout({
                 {/* Background mesh */}
                 <div aria-hidden className="pointer-events-none fixed inset-0 select-none opacity-60">
                   <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_20%_10%,rgba(14,165,233,0.18)_0%,transparent_60%),radial-gradient(50%_50%_at_80%_0%,rgba(34,211,238,0.18)_0%,transparent_55%)]" />
+                  <div className="absolute inset-0 bg-hex opacity-40" />
                 </div>
                 <div className="relative">
                   {children}
