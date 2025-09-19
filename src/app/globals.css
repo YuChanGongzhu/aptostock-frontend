@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode (kept for completeness) */
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+
+    --primary: 188 72% 45%; /* teal/cyan */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 28% 90%;
+    --secondary-foreground: 224 71% 4%;
+    --secondary-text: 215, 16%, 47%;
+
+    --muted: 215 28% 90%;
+    --muted-foreground: 215 16% 35%;
+
+    --accent: 190 90% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 188 72% 45%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Web3 navy background with teal/cyan accents */
+    --background: 215 28% 12%; /* ~#0f1723 */
+    --foreground: 210 40% 98%;
+
+    --card: 215 25% 15%; /* slightly lighter navy */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 215 25% 14%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 188 72% 52%; /* brighter cyan for CTAs */
+    --primary-foreground: 215 28% 12%;
+
+    --secondary: 220 25% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 220 25% 20%;
+    --muted-foreground: 215 16% 70%;
+
+    --accent: 184 66% 55%; /* cyan-teal */
+    --accent-foreground: 215 28% 12%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 215 20% 22%;
+    --input: 215 20% 22%;
+    --ring: 188 72% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Utilities: background gradient and glassmorphism cards */
+@layer utilities {
+  .bg-app-gradient {
+    /* Deep navy to indigo with cyan glow, inspired by the logo */
+    background-image:
+      radial-gradient(1200px 800px at 80% -10%, rgba(34,211,238,0.18), transparent 60%),
+      radial-gradient(1000px 700px at 10% -20%, rgba(14,165,233,0.18), transparent 55%),
+      linear-gradient(180deg, hsl(215 28% 12%) 0%, hsl(220 24% 10%) 40%, hsl(224 22% 9%) 100%);
+    background-attachment: fixed;
+    background-size: 120% 120%, 120% 120%, 100% 100%;
+    animation: gradientShift 18s ease-in-out infinite;
+  }
+
+  .glass-card {
+    backdrop-filter: blur(10px);
+    background-color: rgba(18, 26, 38, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  }
+
+  .gradient-text {
+    background: linear-gradient(90deg, #22d3ee 0%, #06b6d4 45%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Subtle hex/grid overlay */
+  .bg-hex {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 1px),
+      radial-gradient(circle at 16px 16px, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+  }
+
+  /* Neon glow button style */
+  .btn-neon {
+    background: linear-gradient(90deg, #22d3ee, #06b6d4 50%, #60a5fa);
+    color: #0b1220;
+    box-shadow: 0 0 0 1px rgba(34,211,238,0.35) inset, 0 8px 30px rgba(34,211,238,0.25), 0 0 12px rgba(96,165,250,0.25);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  }
+  .btn-neon:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 0 0 1px rgba(34,211,238,0.45) inset, 0 10px 36px rgba(34,211,238,0.35), 0 0 14px rgba(96,165,250,0.35);
+  }
+  .btn-neon:active { transform: translateY(1px); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 0%, 100% 0%, 50% 0%; }
+  50% { background-position: 100% 0%, 0% 0%, 50% 100%; }
+  100% { background-position: 0% 0%, 100% 0%, 50% 0%; }
+}
