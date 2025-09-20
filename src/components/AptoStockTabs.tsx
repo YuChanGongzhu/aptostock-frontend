@@ -214,9 +214,9 @@ export function AptoStockTabs() {
               <span className="text-2xl font-semibold gradient-text">AptoStock Demo</span>
               <div className="flex items-center gap-3">
                 <Button className="btn-neon" onClick={() => (paused ? resume() : pause())}>
-                  {paused ? "恢复价格" : "暂停价格"}
+                  {paused ? "获取价格" : "暂停获取"}
                 </Button>
-                <Button variant="secondary" onClick={onReset}>重置 Demo</Button>
+                <Button variant="secondary" onClick={onReset}>重置最新价格</Button>
               </div>
             </CardTitle>
             {headerBadge}
