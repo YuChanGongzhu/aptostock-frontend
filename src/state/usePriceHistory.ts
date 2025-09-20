@@ -10,13 +10,38 @@ const MAX_POINTS = 600; // ~10 minutes if interval 1s, but oracle is 3s so ~30 m
 export function usePriceHistory(prices: { TLSA: number; CRCL: number } | null, frameMs = 10_000) {
   const [tlsa, setTlsA] = useState<PricePoint[]>([]);
   const [crcl, setCrcl] = useState<PricePoint[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  const KEY = "apto_price_history_v1";
+
+  // Hydrate from localStorage on mount (client-only)
+  useEffect(() => {
+    try {
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(KEY) : null;
+      if (raw) {
+        const parsed = JSON.parse(raw) as { TLSA?: PricePoint[]; CRCL?: PricePoint[] };
+        const norm = (arr?: PricePoint[]) =>
+          Array.isArray(arr)
+            ? arr
+                .filter((x) => x && typeof x.t === "number" && typeof x.p === "number" && isFinite(x.t) && isFinite(x.p))
+                .slice(-MAX_POINTS)
+            : [];
+        setTlsA(norm(parsed.TLSA));
+        setCrcl(norm(parsed.CRCL));
+      }
+    } catch (_) {
+      // ignore corrupt storage
+    } finally {
+      setLoaded(true);
+    }
+  }, []);
 
   // append price snapshot when oracle updates
   const lastTLSA = useRef<number | null>(null);
   const lastCRCL = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!prices) return;
+    if (!prices || !loaded) return;
     const now = Date.now();
     if (lastTLSA.current !== prices.TLSA) {
       lastTLSA.current = prices.TLSA;
@@ -32,7 +57,20 @@ export function usePriceHistory(prices: { TLSA: number; CRCL: number } | null, f
         return next.length > MAX_POINTS ? next.slice(next.length - MAX_POINTS) : next;
       });
     }
-  }, [prices]);
+  }, [prices, loaded]);
+
+  // Persist to localStorage when arrays change (client-only)
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      if (typeof window !== "undefined") {
+        const payload = JSON.stringify({ TLSA: tlsa, CRCL: crcl });
+        window.localStorage.setItem(KEY, payload);
+      }
+    } catch (_) {
+      // ignore quota errors
+    }
+  }, [tlsa, crcl, loaded]);
 
   const toCandles = (points: PricePoint[]): Candle[] => {
     if (!points.length) return [];
@@ -58,5 +96,17 @@ export function usePriceHistory(prices: { TLSA: number; CRCL: number } | null, f
     CRCL: toCandles(crcl),
   }), [tlsa, crcl, frameMs]);
 
-  return { points: { TLSA: tlsa, CRCL: crcl }, candles };
+  const reset = () => {
+    setTlsA([]);
+    setCrcl([]);
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(KEY);
+      }
+    } catch (_) {
+      // ignore
+    }
+  };
+
+  return { points: { TLSA: tlsa, CRCL: crcl }, candles, reset };
 }

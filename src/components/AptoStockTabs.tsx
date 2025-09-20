@@ -30,7 +30,7 @@ export function AptoStockTabs() {
   // K-line chart toggle state
   type Sym = "TLSA" | "CRCL";
   const [chartSym, setChartSym] = useState<Sym | null>(null);
-  const { candles } = usePriceHistory(prices, 10_000);
+  const { candles, reset: resetHistory } = usePriceHistory(prices, 10_000);
   const toggleChart = (sym: Sym) => setChartSym((s) => (s === sym ? null : sym));
 
   // Mint state
@@ -127,6 +127,7 @@ export function AptoStockTabs() {
   const onReset = () => {
     resetBalances();
     resetPools();
+    resetHistory();
   };
 
   const headerBadge = (
