@@ -11,6 +11,7 @@ export function usePriceHistory(prices: { TLSA: number; CRCL: number } | null, f
   const [tlsa, setTlsA] = useState<PricePoint[]>([]);
   const [crcl, setCrcl] = useState<PricePoint[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [hadStored, setHadStored] = useState(false);
 
   const KEY = "apto_price_history_v1";
 
@@ -28,6 +29,9 @@ export function usePriceHistory(prices: { TLSA: number; CRCL: number } | null, f
             : [];
         setTlsA(norm(parsed.TLSA));
         setCrcl(norm(parsed.CRCL));
+        if ((parsed.TLSA && parsed.TLSA.length) || (parsed.CRCL && parsed.CRCL.length)) {
+          setHadStored(true);
+        }
       }
     } catch (_) {
       // ignore corrupt storage
@@ -39,6 +43,38 @@ export function usePriceHistory(prices: { TLSA: number; CRCL: number } | null, f
   // append price snapshot when oracle updates
   const lastTLSA = useRef<number | null>(null);
   const lastCRCL = useRef<number | null>(null);
+  const seededRef = useRef(false);
+
+  // Seed mock history once if no stored data
+  useEffect(() => {
+    if (!loaded || hadStored || seededRef.current) return;
+    // wait until we have at least a starting price
+    const baseTLSA = prices?.TLSA ?? 10;
+    const baseCRCL = prices?.CRCL ?? 5;
+    // If prices not ready yet, hold off seeding until they are available (effect will rerun)
+    if (!prices) return;
+
+    const now = Date.now();
+    const SEED_MINUTES = 20; // about 20 minutes of history
+    const STEP_MS = 5_000; // 5s interval points
+    const steps = Math.min(Math.floor((SEED_MINUTES * 60_000) / STEP_MS), MAX_POINTS - 2);
+    const gen = (base: number) => {
+      let p = base;
+      const arr: PricePoint[] = [];
+      for (let i = steps; i > 0; i--) {
+        // gentle random walk: +/- up to 0.4%
+        const drift = (Math.random() - 0.5) * 0.008; // -0.4%..+0.4%
+        p = Math.max(0.000001, p * (1 + drift));
+        const t = now - i * STEP_MS;
+        arr.push({ t, p: +p.toFixed(6) });
+      }
+      return arr;
+    };
+
+    setTlsA(gen(baseTLSA));
+    setCrcl(gen(baseCRCL));
+    seededRef.current = true;
+  }, [loaded, hadStored, prices]);
 
   useEffect(() => {
     if (!prices || !loaded) return;
